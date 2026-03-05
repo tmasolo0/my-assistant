@@ -49,7 +49,7 @@ export async function resolveGatewayInstallToken(
   let token: string | undefined = explicitToken || configToken || (tokenRef ? undefined : envToken);
   let unavailableReason: string | undefined;
 
-  if (tokenRef && !token) {
+  if (tokenRef && !token && needsToken) {
     try {
       const resolved = await resolveSecretRefValues([tokenRef], {
         config: cfg,
@@ -63,13 +63,7 @@ export async function resolveGatewayInstallToken(
         "gateway.auth.token is SecretRef-managed; install will not persist a resolved token in service environment. Ensure the SecretRef is resolvable in the daemon runtime context.",
       );
     } catch (err) {
-      if (needsToken) {
-        unavailableReason = `gateway.auth.token SecretRef is configured but unresolved (${String(err)}).`;
-      } else {
-        warnings.push(
-          `Warning: gateway.auth.token SecretRef could not be resolved for install (${String(err)}).`,
-        );
-      }
+      unavailableReason = `gateway.auth.token SecretRef is configured but unresolved (${String(err)}).`;
     }
   }
 
