@@ -346,7 +346,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
     ).toThrow("gateway.remote.token");
   });
 
-  it("ignores unresolved local token ref in remote mode when local auth mode is none", () => {
+  it("ignores unresolved local token ref in remote-only mode when local auth mode is token", () => {
     const resolved = resolveGatewayCredentialsFromConfig({
       cfg: {
         gateway: {
@@ -355,7 +355,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
             url: "wss://gateway.example",
           },
           auth: {
-            mode: "none",
+            mode: "token",
             token: { source: "env", provider: "default", id: "MISSING_LOCAL_TOKEN" },
           },
         },
@@ -374,6 +374,34 @@ describe("resolveGatewayCredentialsFromConfig", () => {
       token: undefined,
       password: undefined,
     });
+  });
+
+  it("throws for unresolved local token ref in remote mode when local fallback is enabled", () => {
+    expect(() =>
+      resolveGatewayCredentialsFromConfig({
+        cfg: {
+          gateway: {
+            mode: "remote",
+            remote: {
+              url: "wss://gateway.example",
+            },
+            auth: {
+              mode: "token",
+              token: { source: "env", provider: "default", id: "MISSING_LOCAL_TOKEN" },
+            },
+          },
+          secrets: {
+            providers: {
+              default: { source: "env" },
+            },
+          },
+        } as unknown as OpenClawConfig,
+        env: {} as NodeJS.ProcessEnv,
+        includeLegacyEnv: false,
+        remoteTokenFallback: "remote-env-local",
+        remotePasswordFallback: "remote-only",
+      }),
+    ).toThrow("gateway.auth.token");
   });
 
   it("does not throw for unresolved remote token ref when password is available", () => {
