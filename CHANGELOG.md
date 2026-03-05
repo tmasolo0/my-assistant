@@ -127,6 +127,7 @@ Docs: https://docs.openclaw.ai
 - Feishu/groupPolicy legacy alias compatibility: treat legacy `groupPolicy: "allowall"` as `open` in both schema parsing and runtime policy checks so intended open-group configs no longer silently drop group messages when `groupAllowFrom` is empty. (from #36358) Thanks @Sid-Qin.
 
 - Mattermost/plugin SDK import policy: replace remaining monolithic `openclaw/plugin-sdk` imports in Mattermost mention-gating paths/tests with scoped subpaths (`openclaw/plugin-sdk/compat` and `openclaw/plugin-sdk/mattermost`) so `pnpm check` passes `lint:plugins:no-monolithic-plugin-sdk-entry-imports` on baseline. (#36480) Thanks @Takhoffman.
+- Telegram/poll action discovery: require one executable Telegram account with both `sendMessage` and `poll` enabled before advertising `poll`, preventing split-capability multi-account configs from exposing poll actions that always fail at runtime. (#36547) thanks @gumadeiras.
 
 ## 2026.3.2
 
