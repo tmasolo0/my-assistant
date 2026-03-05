@@ -182,9 +182,9 @@ export async function maybeRepairGatewayDaemon(params: {
         if (tokenResolution.unavailableReason) {
           note(
             [
-              "Gateway service install aborted: gateway token is required but unavailable.",
+              "Gateway service install aborted.",
               tokenResolution.unavailableReason,
-              "Set OPENCLAW_GATEWAY_TOKEN in this shell or resolve your secret provider, then rerun doctor.",
+              "Fix gateway auth config/token input and rerun doctor.",
             ].join("\n"),
             "Gateway",
           );

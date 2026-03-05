@@ -77,9 +77,7 @@ export async function runDaemonInstall(opts: DaemonInstallOptions) {
     persistGeneratedToken: true,
   });
   if (tokenResolution.unavailableReason) {
-    fail(
-      `Gateway install blocked: ${tokenResolution.unavailableReason} Resolve the SecretRef or provide --token.`,
-    );
+    fail(`Gateway install blocked: ${tokenResolution.unavailableReason}`);
     return;
   }
   for (const warning of tokenResolution.warnings) {

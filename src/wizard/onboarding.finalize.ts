@@ -177,7 +177,7 @@ export async function finalizeOnboardingWizard(
           installError = [
             "Gateway install blocked:",
             tokenResolution.unavailableReason,
-            "Set OPENCLAW_GATEWAY_TOKEN in this shell or resolve your secret provider, then rerun onboarding.",
+            "Fix gateway auth config/token input and rerun onboarding.",
           ].join(" ");
         } else {
           const { programArguments, workingDirectory, environment } = await buildGatewayInstallPlan(

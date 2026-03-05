@@ -99,7 +99,7 @@ export async function maybeInstallDaemon(params: {
           installError = [
             "Gateway install blocked:",
             tokenResolution.unavailableReason,
-            "Set OPENCLAW_GATEWAY_TOKEN in this shell or resolve your secret provider, then rerun configure.",
+            "Fix gateway auth config/token input and rerun configure.",
           ].join(" ");
           progress.setLabel("Gateway service install blocked.");
           return;

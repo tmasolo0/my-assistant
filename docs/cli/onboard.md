@@ -69,6 +69,7 @@ Gateway token options in non-interactive mode:
 - `--gateway-token-ref-env` requires a non-empty env var in the onboarding process environment.
 - With `--install-daemon`, when token auth requires a token, SecretRef-managed gateway tokens are validated but not persisted as resolved plaintext in supervisor service environment metadata.
 - With `--install-daemon`, if token mode requires a token and the configured token SecretRef is unresolved, onboarding fails closed with remediation guidance.
+- With `--install-daemon`, if both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, onboarding blocks install until mode is set explicitly.
 
 Example:
 
