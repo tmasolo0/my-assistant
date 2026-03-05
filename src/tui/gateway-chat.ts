@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { loadConfig } from "../config/config.js";
 import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
+import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
 import {
   buildGatewayConnectionDetails,
   ensureExplicitGatewayAuth,
@@ -97,27 +98,6 @@ function throwGatewayAuthResolutionError(reason: string): never {
       "Fix: set OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD, pass --token/--password,",
       "or resolve the configured secret provider for this credential.",
     ].join("\n"),
-  );
-}
-
-function assertExplicitGatewayAuthModeWhenBothConfigured(
-  config: ReturnType<typeof loadConfig>,
-): void {
-  const auth = config.gateway?.auth;
-  if (!auth) {
-    return;
-  }
-  if (typeof auth.mode === "string" && auth.mode.trim().length > 0) {
-    return;
-  }
-  const defaults = config.secrets?.defaults;
-  const hasToken = hasConfiguredSecretInput(auth.token, defaults);
-  const hasPassword = hasConfiguredSecretInput(auth.password, defaults);
-  if (!hasToken || !hasPassword) {
-    return;
-  }
-  throwGatewayAuthResolutionError(
-    "Invalid config: gateway.auth.token and gateway.auth.password are both configured, but gateway.auth.mode is unset. Set gateway.auth.mode to token or password.",
   );
 }
 
@@ -392,7 +372,11 @@ export async function resolveGatewayConnection(
     };
   }
 
-  assertExplicitGatewayAuthModeWhenBothConfigured(config);
+  try {
+    assertExplicitGatewayAuthModeWhenBothConfigured(config);
+  } catch (err) {
+    throwGatewayAuthResolutionError(err instanceof Error ? err.message : String(err));
+  }
 
   const defaults = config.secrets?.defaults;
   const hasConfiguredToken = hasConfiguredSecretInput(config.gateway?.auth?.token, defaults);

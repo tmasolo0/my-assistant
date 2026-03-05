@@ -6,6 +6,7 @@ import {
   normalizeSecretInputString,
   resolveSecretInputRef,
 } from "../config/types.secrets.js";
+import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 import { resolveGatewayBindUrl } from "../shared/gateway-bind-url.js";
@@ -193,25 +194,6 @@ function resolveAuth(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): ResolveAuthRe
     return { password, label: "password" };
   }
   return { error: "Gateway auth is not configured (no token or password)." };
-}
-
-function assertExplicitGatewayAuthModeWhenBothConfigured(cfg: OpenClawConfig): void {
-  const auth = cfg.gateway?.auth;
-  if (!auth) {
-    return;
-  }
-  if (typeof auth.mode === "string" && auth.mode.trim().length > 0) {
-    return;
-  }
-  const defaults = cfg.secrets?.defaults;
-  const tokenConfigured = hasConfiguredSecretInput(auth.token, defaults);
-  const passwordConfigured = hasConfiguredSecretInput(auth.password, defaults);
-  if (!tokenConfigured || !passwordConfigured) {
-    return;
-  }
-  throw new Error(
-    "Invalid config: gateway.auth.token and gateway.auth.password are both configured, but gateway.auth.mode is unset. Set gateway.auth.mode to token or password.",
-  );
 }
 
 async function resolveGatewayTokenSecretRef(
