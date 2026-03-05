@@ -1,0 +1,21 @@
+bot:
+  name: "${BOT_NAME:-MyAssistant}"
+  language: "${BOT_LANGUAGE:-ru}"
+  system_prompt: "./config/system-prompt.md"
+
+telegram:
+  allowed_chat_ids: "${TELEGRAM_ALLOWED_CHAT_IDS}"
+  parse_mode: "Markdown"
+
+memory:
+  max_context_messages: 50
+  summarize_after: 30
+  long_term_enabled: true
+
+# NOTE: These settings are reference/documentation files.
+# OpenClaw's actual configuration lives in openclaw.json (JSON5 format).
+# The system prompt is injected via workspace bootstrap files:
+#   - workspace/AGENTS.md  -- agent instructions (loaded every session)
+#   - workspace/SOUL.md    -- persona, tone, boundaries (loaded every session)
+#   - workspace/USER.md    -- user profile (loaded every session)
+# See: https://docs.openclaw.ai/concepts/system-prompt
