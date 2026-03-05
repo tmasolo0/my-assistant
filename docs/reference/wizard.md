@@ -101,6 +101,8 @@ For a high-level overview, see [Onboarding Wizard](/start/wizard).
       - Wizard attempts to enable lingering via `loginctl enable-linger <user>` so the Gateway stays up after logout.
       - May prompt for sudo (writes `/var/lib/systemd/linger`); it tries without sudo first.
     - **Runtime selection:** Node (recommended; required for WhatsApp/Telegram). Bun is **not recommended**.
+    - If `gateway.auth.token` is SecretRef-managed, daemon install validates it but does not persist resolved plaintext token values into supervisor service environment metadata.
+    - If token auth requires a token and the configured token SecretRef is unresolved, daemon install is blocked with actionable guidance.
   </Step>
   <Step title="Health check">
     - Starts the Gateway (if needed) and runs `openclaw health`.

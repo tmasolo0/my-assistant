@@ -267,6 +267,8 @@ Notes:
 - `openclaw doctor --yes` accepts the default repair prompts.
 - `openclaw doctor --repair` applies recommended fixes without prompts.
 - `openclaw doctor --repair --force` overwrites custom supervisor configs.
+- If `gateway.auth.token` is SecretRef-managed, doctor service install/repair validates the SecretRef but does not persist resolved plaintext token values into supervisor service environment metadata.
+- If token auth requires a token and the configured token SecretRef is unresolved, doctor blocks the install/repair path with actionable guidance.
 - You can always force a full rewrite via `openclaw gateway install --force`.
 
 ### 16) Gateway runtime + port diagnostics
