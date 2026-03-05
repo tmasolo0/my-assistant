@@ -65,9 +65,13 @@ vi.mock("../daemon/service.js", () => ({
   })),
 }));
 
-vi.mock("../daemon/systemd.js", () => ({
-  isSystemdUserServiceAvailable,
-}));
+vi.mock("../daemon/systemd.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../daemon/systemd.js")>();
+  return {
+    ...actual,
+    isSystemdUserServiceAvailable,
+  };
+});
 
 vi.mock("../infra/control-ui-assets.js", () => ({
   ensureControlUiAssetsBuilt: vi.fn(async () => ({ ok: true })),

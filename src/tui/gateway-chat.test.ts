@@ -150,38 +150,41 @@ describe("resolveGatewayConnection", () => {
     });
   });
 
-  it("resolves file-backed SecretRef token for local mode", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tui-file-secret-"));
-    const secretFile = path.join(tempDir, "secrets.json");
-    await fs.writeFile(secretFile, JSON.stringify({ gatewayToken: "file-secret-token" }), "utf8");
-    await fs.chmod(secretFile, 0o600);
+  it.runIf(process.platform !== "win32")(
+    "resolves file-backed SecretRef token for local mode",
+    async () => {
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tui-file-secret-"));
+      const secretFile = path.join(tempDir, "secrets.json");
+      await fs.writeFile(secretFile, JSON.stringify({ gatewayToken: "file-secret-token" }), "utf8");
+      await fs.chmod(secretFile, 0o600);
 
-    loadConfig.mockReturnValue({
-      secrets: {
-        providers: {
-          fileProvider: {
-            source: "file",
-            path: secretFile,
-            mode: "json",
-            allowInsecurePath: true,
+      loadConfig.mockReturnValue({
+        secrets: {
+          providers: {
+            fileProvider: {
+              source: "file",
+              path: secretFile,
+              mode: "json",
+              allowInsecurePath: true,
+            },
           },
         },
-      },
-      gateway: {
-        mode: "local",
-        auth: {
-          token: { source: "file", provider: "fileProvider", id: "/gatewayToken" },
+        gateway: {
+          mode: "local",
+          auth: {
+            token: { source: "file", provider: "fileProvider", id: "/gatewayToken" },
+          },
         },
-      },
-    });
+      });
 
-    try {
-      const result = await resolveGatewayConnection({});
-      expect(result.token).toBe("file-secret-token");
-    } finally {
-      await fs.rm(tempDir, { recursive: true, force: true });
-    }
-  });
+      try {
+        const result = await resolveGatewayConnection({});
+        expect(result.token).toBe("file-secret-token");
+      } finally {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      }
+    },
+  );
 
   it("resolves exec-backed SecretRef token for local mode", async () => {
     const execProgram = [
