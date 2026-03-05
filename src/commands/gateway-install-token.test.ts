@@ -14,6 +14,7 @@ const resolveGatewayAuthMock = vi.hoisted(() =>
     allowTailscale: false,
   })),
 );
+const shouldRequireGatewayTokenForInstallMock = vi.hoisted(() => vi.fn(() => true));
 const resolveSecretRefValuesMock = vi.hoisted(() => vi.fn());
 const secretRefKeyMock = vi.hoisted(() => vi.fn(() => "env:default:OPENCLAW_GATEWAY_TOKEN"));
 const randomTokenMock = vi.hoisted(() => vi.fn(() => "generated-token"));
@@ -29,6 +30,10 @@ vi.mock("../config/types.secrets.js", () => ({
 
 vi.mock("../gateway/auth.js", () => ({
   resolveGatewayAuth: resolveGatewayAuthMock,
+}));
+
+vi.mock("../gateway/auth-install-policy.js", () => ({
+  shouldRequireGatewayTokenForInstall: shouldRequireGatewayTokenForInstallMock,
 }));
 
 vi.mock("../secrets/ref-contract.js", () => ({
@@ -51,6 +56,7 @@ describe("resolveGatewayInstallToken", () => {
     readConfigFileSnapshotMock.mockResolvedValue({ exists: false, valid: true, config: {} });
     resolveSecretInputRefMock.mockReturnValue({ ref: undefined });
     resolveSecretRefValuesMock.mockResolvedValue(new Map());
+    shouldRequireGatewayTokenForInstallMock.mockReturnValue(true);
     resolveGatewayAuthMock.mockReturnValue({
       mode: "token",
       token: undefined,
@@ -180,6 +186,33 @@ describe("resolveGatewayInstallToken", () => {
     expect(
       result.warnings.some((message) => message.includes("skipping plaintext token persistence")),
     ).toBeTruthy();
+    expect(writeConfigFileMock).not.toHaveBeenCalled();
+  });
+
+  it("does not auto-generate when inferred mode has password SecretRef configured", async () => {
+    shouldRequireGatewayTokenForInstallMock.mockReturnValue(false);
+
+    const result = await resolveGatewayInstallToken({
+      config: {
+        gateway: {
+          auth: {
+            password: { source: "env", provider: "default", id: "GATEWAY_PASSWORD" },
+          },
+        },
+        secrets: {
+          providers: {
+            default: { source: "env" },
+          },
+        },
+      } as OpenClawConfig,
+      env: {} as NodeJS.ProcessEnv,
+      autoGenerateWhenMissing: true,
+      persistGeneratedToken: true,
+    });
+
+    expect(result.token).toBeUndefined();
+    expect(result.unavailableReason).toBeUndefined();
+    expect(result.warnings.some((message) => message.includes("Auto-generated"))).toBe(false);
     expect(writeConfigFileMock).not.toHaveBeenCalled();
   });
 });

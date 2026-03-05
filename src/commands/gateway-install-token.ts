@@ -1,5 +1,6 @@
 import { readConfigFileSnapshot, writeConfigFile, type OpenClawConfig } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
+import { shouldRequireGatewayTokenForInstall } from "../gateway/auth-install-policy.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
@@ -43,7 +44,7 @@ export async function resolveGatewayInstallToken(
     tailscaleMode: cfg.gateway?.tailscale?.mode ?? "off",
   });
   const needsToken =
-    resolvedAuth.mode === "token" && !resolvedAuth.token && !resolvedAuth.allowTailscale;
+    shouldRequireGatewayTokenForInstall(cfg, options.env) && !resolvedAuth.allowTailscale;
 
   let token: string | undefined = explicitToken || configToken || (tokenRef ? undefined : envToken);
   let unavailableReason: string | undefined;

@@ -33,6 +33,7 @@ async function resolveDashboardToken(
   token?: string;
   source?: "config" | "env" | "secretRef";
   unresolvedRefReason?: string;
+  tokenSecretRefConfigured: boolean;
 }> {
   const { ref } = resolveSecretInputRef({
     value: cfg.gateway?.auth?.token,
@@ -43,11 +44,13 @@ async function resolveDashboardToken(
       ? undefined
       : cfg.gateway.auth.token.trim() || undefined;
   if (configToken) {
-    return { token: configToken, source: "config" };
+    return { token: configToken, source: "config", tokenSecretRefConfigured: false };
   }
   if (!ref) {
     const envToken = readGatewayTokenEnv(env);
-    return envToken ? { token: envToken, source: "env" } : {};
+    return envToken
+      ? { token: envToken, source: "env", tokenSecretRefConfigured: false }
+      : { tokenSecretRefConfigured: false };
   }
   const refLabel = `${ref.source}:${ref.provider}:${ref.id}`;
   try {
@@ -57,17 +60,23 @@ async function resolveDashboardToken(
     });
     const value = resolved.get(secretRefKey(ref));
     if (typeof value === "string" && value.trim().length > 0) {
-      return { token: value.trim(), source: "secretRef" };
+      return { token: value.trim(), source: "secretRef", tokenSecretRefConfigured: true };
     }
     const envToken = readGatewayTokenEnv(env);
     return envToken
-      ? { token: envToken, source: "env" }
-      : { unresolvedRefReason: `gateway.auth.token SecretRef is unresolved (${refLabel}).` };
+      ? { token: envToken, source: "env", tokenSecretRefConfigured: true }
+      : {
+          unresolvedRefReason: `gateway.auth.token SecretRef is unresolved (${refLabel}).`,
+          tokenSecretRefConfigured: true,
+        };
   } catch {
     const envToken = readGatewayTokenEnv(env);
     return envToken
-      ? { token: envToken, source: "env" }
-      : { unresolvedRefReason: `gateway.auth.token SecretRef is unresolved (${refLabel}).` };
+      ? { token: envToken, source: "env", tokenSecretRefConfigured: true }
+      : {
+          unresolvedRefReason: `gateway.auth.token SecretRef is unresolved (${refLabel}).`,
+          tokenSecretRefConfigured: true,
+        };
   }
 }
 
@@ -93,14 +102,14 @@ export async function dashboardCommand(
     basePath,
   });
   // Avoid embedding externally managed SecretRef tokens in terminal/clipboard/browser args.
-  const includeTokenInUrl = token.length > 0 && resolvedToken.source !== "secretRef";
+  const includeTokenInUrl = token.length > 0 && !resolvedToken.tokenSecretRefConfigured;
   // Prefer URL fragment to avoid leaking auth tokens via query params.
   const dashboardUrl = includeTokenInUrl
     ? `${links.httpUrl}#token=${encodeURIComponent(token)}`
     : links.httpUrl;
 
   runtime.log(`Dashboard URL: ${dashboardUrl}`);
-  if (resolvedToken.source === "secretRef" && token) {
+  if (resolvedToken.tokenSecretRefConfigured && token) {
     runtime.log(
       "Token auto-auth is disabled for SecretRef-managed gateway.auth.token; use your external token source if prompted.",
     );

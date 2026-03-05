@@ -1,5 +1,6 @@
 import type { OpenClawConfig } from "../config/config.js";
-import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
+import { resolveSecretInputRef } from "../config/types.secrets.js";
+export { shouldRequireGatewayTokenForInstall } from "../gateway/auth-install-policy.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 
@@ -50,24 +51,4 @@ export async function resolveGatewayAuthTokenForService(
     }
   }
   return { token: readGatewayTokenEnv(env) };
-}
-
-export function shouldRequireGatewayTokenForInstall(
-  cfg: OpenClawConfig,
-  env: NodeJS.ProcessEnv,
-): boolean {
-  const mode = cfg.gateway?.auth?.mode;
-  if (mode === "token") {
-    return true;
-  }
-  if (mode === "password" || mode === "none" || mode === "trusted-proxy") {
-    return false;
-  }
-  const hasPasswordEnvCandidate = Boolean(
-    env.OPENCLAW_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
-  );
-  if (hasPasswordEnvCandidate) {
-    return false;
-  }
-  return !hasConfiguredSecretInput(cfg.gateway?.auth?.password, cfg.secrets?.defaults);
 }
