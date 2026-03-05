@@ -74,6 +74,8 @@ For a high-level overview, see [Onboarding Wizard](/start/wizard).
     - In token mode, interactive onboarding offers:
       - **Generate/store plaintext token** (default)
       - **Use SecretRef** (opt-in)
+      - Quickstart reuses existing `gateway.auth.token` SecretRefs across `env`, `file`, and `exec` providers for onboarding probe/dashboard bootstrap.
+      - If that SecretRef is configured but cannot be resolved, onboarding fails early with a clear fix message instead of silently degrading runtime auth.
     - In password mode, interactive onboarding also supports plaintext or SecretRef storage.
     - Non-interactive token SecretRef path: `--gateway-token-ref-env <ENV_VAR>`.
       - Requires a non-empty env var in the onboarding process environment.
