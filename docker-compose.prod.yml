@@ -1,8 +1,9 @@
 services:
   openclaw:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: my-assistant-openclaw:latest
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
     ports:
       - "18789:18789"
     env_file: .env
@@ -35,6 +36,7 @@ services:
         cp -r /home/node/.openclaw/config-src/* /home/node/.openclaw/config/ 2>/dev/null || true
         cp /home/node/.openclaw/openclaw.json.src /home/node/.openclaw/openclaw.json 2>/dev/null || true
         cp /home/node/.openclaw/openclaw.json.src /home/node/.openclaw/config/openclaw.json 2>/dev/null || true
+        apt-get update -qq && apt-get install -y -qq jq > /dev/null 2>&1 || true
         chown -R 1000:1000 /home/node/.openclaw
         export OPENCLAW_CONFIG_PATH=/home/node/.openclaw/openclaw.json
         su -s /bin/sh node -c 'export OPENCLAW_CONFIG_PATH=/home/node/.openclaw/openclaw.json && /home/node/.openclaw/scripts/expand-allowlist.sh && exec node /app/dist/index.js gateway --bind lan --port 18789'

@@ -12,7 +12,7 @@
 
   // Environment variables (secrets come from .env)
   env: {
-    ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}",
+    OPENROUTER_API_KEY: "${OPENROUTER_API_KEY}",
     OPENAI_API_KEY: "${OPENAI_API_KEY}",
   },
 
@@ -41,11 +41,18 @@
         },
       },
       model: {
-        primary: "anthropic/claude-sonnet-4-6",
+        primary: "openrouter/anthropic/claude-sonnet-4-6",
+        fallbacks: [
+          "openrouter/google/gemini-2.5-pro",
+          "openrouter/openai/gpt-4.1",
+        ],
       },
       models: {
-        "anthropic/claude-sonnet-4-6": { alias: "Sonnet" },
-        "anthropic/claude-opus-4-6": { alias: "Opus" },
+        "openrouter/anthropic/claude-sonnet-4-6": { alias: "Sonnet" },
+        "openrouter/anthropic/claude-opus-4-6": { alias: "Opus" },
+        "openrouter/google/gemini-2.5-pro": { alias: "Gemini" },
+        "openrouter/openai/gpt-4.1": { alias: "GPT" },
+        "openrouter/anthropic/claude-haiku-4-5": { alias: "Haiku" },
       },
     },
     list: [

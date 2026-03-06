@@ -38,3 +38,14 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.
+
+### Image Generation (DALL-E)
+
+OpenAI API key is available as $OPENAI_API_KEY.
+
+When the user asks to generate/draw/create an image:
+1. Use exec tool to call DALL-E API:
+   curl -s https://api.openai.com/v1/images/generations -H "Authorization: Bearer $OPENAI_API_KEY" -H "Content-Type: application/json" -d '{"model":"dall-e-3","prompt":"DESCRIPTION_IN_ENGLISH","n":1,"size":"1024x1024"}' | jq -r '.data[0].url'
+2. Send the resulting URL to the user using the message tool with the URL in the media field
+3. Never save images locally - always use the URL directly
+4. Translate the user's prompt to English for better DALL-E results
