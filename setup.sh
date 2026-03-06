@@ -25,10 +25,10 @@ fi
 
 # Telegram
 read -rp "Telegram Bot Token: " tg_token
-sed -i "s|^TELEGRAM_BOT_TOKEN=.*|TELEGRAM_BOT_TOKEN=${tg_token}|" .env
+sed -i '' "s|^TELEGRAM_BOT_TOKEN=.*|TELEGRAM_BOT_TOKEN=${tg_token}|" .env
 
 read -rp "Your Telegram Chat ID (for authorization): " chat_id
-sed -i "s|^TELEGRAM_ALLOWED_CHAT_IDS=.*|TELEGRAM_ALLOWED_CHAT_IDS=${chat_id}|" .env
+sed -i '' "s|^TELEGRAM_ALLOWED_CHAT_IDS=.*|TELEGRAM_ALLOWED_CHAT_IDS=${chat_id}|" .env
 
 # LLM Provider
 echo ""
@@ -43,22 +43,22 @@ PROFILES=""
 
 case $llm_choice in
     1)
-        sed -i "s|^LLM_PROVIDER=.*|LLM_PROVIDER=openrouter|" .env
+        sed -i '' "s|^LLM_PROVIDER=.*|LLM_PROVIDER=openrouter|" .env
         read -rp "OpenRouter API Key: " key
-        sed -i "s|^OPENROUTER_API_KEY=.*|OPENROUTER_API_KEY=${key}|" .env
+        sed -i '' "s|^OPENROUTER_API_KEY=.*|OPENROUTER_API_KEY=${key}|" .env
         ;;
     2)
-        sed -i "s|^LLM_PROVIDER=.*|LLM_PROVIDER=anthropic|" .env
+        sed -i '' "s|^LLM_PROVIDER=.*|LLM_PROVIDER=anthropic|" .env
         read -rp "Anthropic API Key: " key
-        sed -i "s|^ANTHROPIC_API_KEY=.*|ANTHROPIC_API_KEY=${key}|" .env
+        sed -i '' "s|^ANTHROPIC_API_KEY=.*|ANTHROPIC_API_KEY=${key}|" .env
         ;;
     3)
-        sed -i "s|^LLM_PROVIDER=.*|LLM_PROVIDER=openai|" .env
+        sed -i '' "s|^LLM_PROVIDER=.*|LLM_PROVIDER=openai|" .env
         read -rp "OpenAI API Key: " key
-        sed -i "s|^OPENAI_API_KEY=.*|OPENAI_API_KEY=${key}|" .env
+        sed -i '' "s|^OPENAI_API_KEY=.*|OPENAI_API_KEY=${key}|" .env
         ;;
     4)
-        sed -i "s|^LLM_PROVIDER=.*|LLM_PROVIDER=ollama|" .env
+        sed -i '' "s|^LLM_PROVIDER=.*|LLM_PROVIDER=ollama|" .env
         PROFILES="--profile ollama"
         ;;
 esac
@@ -66,7 +66,7 @@ esac
 # Bot name
 read -rp "Bot name [MyAssistant]: " bot_name
 bot_name=${bot_name:-MyAssistant}
-sed -i "s|^BOT_NAME=.*|BOT_NAME=${bot_name}|" .env
+sed -i '' "s|^BOT_NAME=.*|BOT_NAME=${bot_name}|" .env
 
 # Optional profiles
 echo ""
@@ -80,7 +80,7 @@ read -rp "  Web UI? [n]: " yn
 
 # Generate postgres password
 PGPASS=$(openssl rand -base64 16 | tr -d '/+=' | head -c 16)
-sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${PGPASS}|" .env
+sed -i '' "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${PGPASS}|" .env
 
 # Launch
 echo ""

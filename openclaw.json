@@ -12,21 +12,40 @@
 
   // Environment variables (secrets come from .env)
   env: {
-    OPENROUTER_API_KEY: "${OPENROUTER_API_KEY}",
+    ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}",
+    OPENAI_API_KEY: "${OPENAI_API_KEY}",
   },
 
   // Agent & model settings
   agents: {
     defaults: {
       workspace: "./workspace",
+      memorySearch: {
+        enabled: true,
+        provider: "openai",
+        model: "text-embedding-3-small",
+        sources: ["memory", "sessions"],
+        query: {
+          hybrid: {
+            enabled: true,
+            vectorWeight: 0.7,
+            textWeight: 0.3,
+            temporalDecay: {
+              enabled: true,
+              halfLifeDays: 30,
+            },
+          },
+        },
+        store: {
+          vector: { enabled: true },
+        },
+      },
       model: {
-        primary: "openrouter/${OPENROUTER_MODEL}",
+        primary: "anthropic/claude-sonnet-4-6",
       },
       models: {
-        "openrouter/anthropic/claude-sonnet-4-6": { alias: "Sonnet" },
-        "openrouter/anthropic/claude-opus-4-6": { alias: "Opus" },
-        "openrouter/openai/gpt-4.1": { alias: "GPT" },
-        "openrouter/google/gemini-2.5-pro": { alias: "Gemini" },
+        "anthropic/claude-sonnet-4-6": { alias: "Sonnet" },
+        "anthropic/claude-opus-4-6": { alias: "Opus" },
       },
     },
     list: [
