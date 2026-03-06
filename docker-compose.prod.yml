@@ -9,12 +9,16 @@ services:
     environment:
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
       OPENCLAW_CONFIG_DIR: /home/node/.openclaw/config
+      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/openclaw.json
       OPENCLAW_WORKSPACE_DIR: /home/node/.openclaw/workspace
     volumes:
       - openclaw-config:/home/node/.openclaw/config
       - openclaw-workspace:/home/node/.openclaw/workspace
       - ./config:/home/node/.openclaw/config-src:ro
+      - ./openclaw.json:/home/node/.openclaw/openclaw.json.src:ro
       - ./scripts:/home/node/.openclaw/scripts:ro
+      - ./openclaw.json:/app/openclaw.json:ro
+      - ./workspace:/app/workspace
     depends_on:
       postgres:
         condition: service_healthy
@@ -23,13 +27,17 @@ services:
     networks:
       - assistant
     restart: unless-stopped
+    user: "0:0"
     command:
       - /bin/sh
       - -c
       - |
         cp -r /home/node/.openclaw/config-src/* /home/node/.openclaw/config/ 2>/dev/null || true
-        /home/node/.openclaw/scripts/expand-allowlist.sh
-        exec node dist/index.js gateway --bind 0.0.0.0 --port 18789
+        cp /home/node/.openclaw/openclaw.json.src /home/node/.openclaw/openclaw.json 2>/dev/null || true
+        cp /home/node/.openclaw/openclaw.json.src /home/node/.openclaw/config/openclaw.json 2>/dev/null || true
+        chown -R 1000:1000 /home/node/.openclaw
+        export OPENCLAW_CONFIG_PATH=/home/node/.openclaw/openclaw.json
+        su -s /bin/sh node -c 'export OPENCLAW_CONFIG_PATH=/home/node/.openclaw/openclaw.json && /home/node/.openclaw/scripts/expand-allowlist.sh && exec node /app/dist/index.js gateway --bind lan --port 18789'
 
   postgres:
     image: postgres:16-alpine
